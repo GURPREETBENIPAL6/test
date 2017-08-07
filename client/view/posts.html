@@ -83,16 +83,16 @@
                             //'</div>'
                             
                             
-                            
-                            '<div class="whole_box" data-postId="' + post._id + '">'+
-        	 '<div>'+
+                            '<div class="data_boxfooter">'+
+                            '<div class="whole_box"  data-postId="' + post._id + '">'+
+        	 '<div >'+
         	     '<div >'+
         	        '<div class="container">'+
         			   '<div class="row" >  '+
         	             ' <div class="col-sm-3"></div>'+
-        	               '<div class="col-sm-6"  >'+
+        	               '<div class="col-sm-7"  >'+
         	                   '<div class="bordrpic">'+
-        			          '<p ><img src="'+post.image+'" class="ciclepic">cute_teddy_bears 6h</p>'+
+        			          '<p ><img src="'+post.image+'" class="ciclepic">cute_teddy_bears </p>'+
         			          '</div>'+
         			        '</div>'+
         			        '<div class="col-sm-3"></div>'+
@@ -103,7 +103,7 @@
             '<div class="container">'+
             '<div class="row">'+
         	  '<div class="col-sm-3"></div>'+
-                '<div class="col-sm-6">'+
+                '<div class="col-sm-7">'+
                     '<div class="bordrpic">'+
                    '<img src="'+post.image+'" class="mainpic">'+
                    '</div>'+
@@ -114,11 +114,14 @@
              '<div class="row">'+
                  '<div class="col-sm-3">'+
                  '</div>'+
-                '<div class="col-sm-6">'+
-                     '<div class="bordrpic">'+
-                      '<p id ="like' + post._id + '">' + post.likeCount + '</p>'+
+                '<div class="col-sm-7">'+
+                     '<div class="bordrpic">'+'<div class="likepic"><img src="../img/LikeIcon.jpg" onclick="likeClick(\'' + post._id + '\');" >'+
+                     '<img src="../img/c.png" );" ></div>'+
+                     '<p id ="like' + post._id + '">' + post.likeCount +'<b>    likes </b>'+ '</p>'+
+                     
                       '<b>_jo._.hanni</b> adorable<p><b>nana89leo</b> </p>'+post.comment+'<hr>'+
-        			    '<div class="likepic"><img src="../img/LikeIcon.jpg" onclick="likeClick(\'' + post._id + '\');" ></div>'+
+                     
+        			    '<div ><p>comment...</p></div>'+
         			 '</div>'+
         		'</div>'+
             '<div class="col-sm-3"></div>'+
@@ -126,14 +129,8 @@
            ' </div>'+
         
      ' </div>'+
-           
-        
-        			
-        		
+'</div>'+
 '</div>'
-                            
-                            
-                            
                         );
                     });
                 })
@@ -141,6 +138,24 @@
                     //always include a catch for exceptions
                     console.log(err);
                 });
+            }
+            function uploadClick(){
+                //go get the data from the form
+                var form = new FormData($("#uploadForm")[0]);
+                //we can post this way as well as $.post
+                $.ajax({
+                        url: '/upload',
+                        method: "POST",
+                        dataType: 'json',
+                        //the form object is the data
+                        data: form,
+                        //we want to send it untouched, so this needs to be false
+                        processData: false,
+                        contentType: false,
+                        //add a message 
+                        success: function(result){},
+                        error: function(er){}
+                });            
             }
         </script>
           <meta charset="utf-8"> 
@@ -180,6 +195,30 @@
    
    </div>
    </div>
+   <!-- Trigger the modal with a button -->
+          <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal">Add a Picture</button>
+        
+          <!-- Modal -->
+          <div class="modal fade" id="myModal" role="dialog">
+            <div class="modal-dialog">
+            
+              <!-- Modal content-->
+              <div class="modal-content">
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal">&times;</button>
+                  <h4 class="modal-title">Add a Picture</h4>
+                </div>
+                <div class="modal-body">
+                    <form id="uploadForm" enctype="multipart/form-data" name="uploadForm" novalidate>
+                        <input type="file" name="userPhoto" id="userPhoto" />
+                    </form>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-default" data-dismiss="modal" onclick="uploadClick();">Send</button>
+                </div>
+              </div>
+            </div>
+          </div>
         <!-- create a div with an id to give us an anchor point to let the javascript do its work -->
         <div id="posts">
             

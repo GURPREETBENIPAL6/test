@@ -2,7 +2,9 @@
   //
 // # SimplestServer
 //
-// by Rick Kozak
+// by Sonam Ghai
+//Gurpreet Kaur
+// Saurav Bedi
 
 //const dbUrl = 'mongodb://user8165:pswd8165@ds161021.mlab.com:61021/prog8165';
 const dbUrl = 'mongodb://insta123:123456@ds131782.mlab.com:31782/instagram';
@@ -13,6 +15,8 @@ const path = require('path');
 //express related
 const express = require('express');
 const bodyParser = require('body-parser');
+const fileUpload = require('express-fileupload');
+const Guid = require('guid');
 //session
 const session = require('express-session');  
 const mongoSession = require('connect-mongodb-session')(session);
@@ -163,7 +167,7 @@ router.get('/verifypassword', function(req, res){
     
     Promise.resolve()
     .then(function(){
-      return PasswordReset.findOne({id: req.body.id});
+      return PasswordReset.findOne({id: req.query.rid});
     })
     .then(function(pr){
       if (pr){
@@ -222,11 +226,12 @@ router.post('/posts', userAuth.isAuthenticated, function(req, res){
 
 //tell the router how to handle a post request to /incrLike
 router.post('/incrLike', userAuth.isAuthenticated, function(req, res){
+
   console.log('increment like for ' + req.body.id + ' by user ' + req.user.email);
 
   Like.findOne({userId: req.user.id, postId: req.body.id})
   .then(function(like){
-    if (!like){
+   // if (!like){
       //go get the post record
       Post.findById(req.body.id)
       .then(function(post){
@@ -244,14 +249,77 @@ router.post('/incrLike', userAuth.isAuthenticated, function(req, res){
         //a successful save returns back the updated object
         res.json({id: req.body.id, count: post.likeCount});  
       })
-    } else {
-        res.json({id: req.body.id, count: -1});  
-    }
+    //} else {
+   //     res.json({id: req.body.id, count: -1});  
+   // }
   })
   .catch(function(err){
     console.log(err);
   })
 });
+
+
+//tell the router how to handle a post request to upload a file
+router.post('/upload', userAuth.isAuthenticated, function(req, res) {
+  var response = {success: false, message: ''};
+  
+  if (req.files){
+    // The name of the input field is used to retrieve the uploaded file 
+    var userPhoto = req.files.userPhoto;
+    //invent a unique file name so no conflicts with any other files
+    var guid = Guid.create();
+    //figure out what extension to apply to the file
+    var extension = '';
+    switch(userPhoto.mimetype){
+      case 'image/jpeg':
+        extension = '.jpg';
+        break;
+      case 'image/png':
+        extension = '.png';
+        break;
+      case 'image/bmp':
+        extension = '.bmp';
+        break;
+      case 'image/gif':
+        extension = '.gif';
+        break;
+    }
+    
+    //if we have an extension, it is a file type we will accept
+    if (extension){
+      //construct the file name
+      var filename = guid + extension;
+      // Use the mv() method to place the file somewhere on your server 
+      userPhoto.mv('./client/img/' + filename, function(err) {
+        //if no error
+        if (!err){
+          //create a post for this image
+          var post = new Post();
+          post.userId = req.user.id;
+          post.image = './img/' + filename;
+          post.likeCount = 0;
+          post.comment = '';
+          post.feedbackCount = 0;
+          //save it
+          post.save()
+          .then(function(){
+            res.json({success: true, message: 'all good'});            
+          })
+        } else {
+          response.message = 'internal error';
+          res.json(response);
+        }
+      });
+    } else {
+      response.message = 'unsupported file type';
+      res.json(response);
+    }
+  } else {
+    response.message = 'no files';
+    res.json(response);
+  }
+});
+
 
 //set up the HTTP server and start it running
 server.listen(process.env.PORT || 3000, process.env.IP || '0.0.0.0', function(){
